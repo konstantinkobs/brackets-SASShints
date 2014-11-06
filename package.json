@@ -1,0 +1,9 @@
+{
+    "name": "sasshints",
+    "title": "SASSHints",
+    "author": "Konstantin Kobs",
+    "homepage": "https://github.com/konstantinkobs/brackets-SASShints",
+    "version": "1.0.0",
+    "engines": { "brackets": ">=0.23" },
+    "description": "Autocompletion for SASS/SCSS variables."
+}

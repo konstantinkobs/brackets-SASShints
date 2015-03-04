@@ -34,8 +34,7 @@ define(function (require, exports, module) {
         LanguageManager = brackets.getModule("language/LanguageManager"),
         ProjectManager = brackets.getModule("project/ProjectManager"),
         FileUtils = brackets.getModule("file/FileUtils"),
-        Async = brackets.getModule("utils/Async"),
-        ColorUtils = brackets.getModule("utils/ColorUtils");
+        Async = brackets.getModule("utils/Async");
 
     // Extension's modules
     var TinyColor = require("thirdparty/tinycolor-min");    
@@ -345,7 +344,6 @@ define(function (require, exports, module) {
             return match[1];
         });
       
-
         // Create the hintsHTML array which will be shown to the
         // user. It has a preview of what the variable is set to.
         this.hintsHTML = matches.map(function (match) {

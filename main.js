@@ -51,6 +51,7 @@ define(function (require, exports, module) {
         this.implicitChar = "$";
         this.regex = /\$([\w\-]+)\s*:\s*([^\n;]+)/ig;
         this.chars = /[\$\w\-]/i;
+        this.maxRecursionDepth = 100;
 
         // Array with hints and the visual list in HTML
         this.hints = [];
@@ -109,6 +110,10 @@ define(function (require, exports, module) {
 
             // Get all matches for the RegExp set earlier
             var matches = that.getAll(that.regex, text);
+
+            // Set values for variables referenced to another variables
+            // for example $v1: red; $v2: v1;
+            that.setRecursiveVars(matches);
 
             // Filter the results by everything the user wrote before
             matches = that.filterHints(matches);
@@ -317,6 +322,61 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Find variables referenced to another variables.
+     * Recursively set values. Add path array to each match.
+     * path array contains all variables, from which value was taken
+     *
+     * @param   {Array} matches Array of matches
+     * @returns {Array} the changed Array
+     */
+    Hint.prototype.setRecursiveVars = function (matches) {
+        var root = this;
+
+        matches.forEach(function (match, i){
+            match.path = [];
+            setupRef(match, root.maxRecursionDepth, i);
+        });
+
+        /**
+         * Recursively go through variables which are referenced to another variables
+         * until value is founded or maximum recursion depth reached
+         *
+         * @param   {Object} match that will be processed
+         * @param   {Number} max   maximum recursion depth
+         * @returns {Object} object with path and value for variable
+         */
+        function setupRef(match, max, originIndex) {
+            var value  = match[2],
+                i      = matches.length,
+                origin = matches[originIndex],
+                path   = origin.path;
+
+            if (max && value && value[0] === "$") {
+                //value is variable. trying to find its value
+                while (i--) {
+                    if ("$" + matches[i][1] === value) {
+                        if (path.indexOf(matches[i][1]) >= 0) {
+                            path.unshift("((circle))");
+                            return value;
+                        }
+
+                        path.push(matches[i][1]);
+                        match[2] = setupRef(matches[i], --max, originIndex);
+
+                        return match[2];
+                    }
+                }
+            }
+            // variable not found (i.e "$v3: fade-out($v1, $v2)")
+            // or value is not a variable, so no magic was needed
+            return value;
+        }
+
+        return matches;
+    };
+
+
+    /**
      * Processes all the matches and prepares the hints and hintsHTML arrays
      *
      * @param   {Array}    matches All the matches (already filtered)
@@ -344,10 +404,11 @@ define(function (require, exports, module) {
             return match[1];
         });
       
+
         // Create the hintsHTML array which will be shown to the
         // user. It has a preview of what the variable is set to.
         this.hintsHTML = matches.map(function (match) {
-            
+            var rezult;
             var matchValue = TinyColor(match[2]);
             var colorTemplate = '';
             
@@ -357,9 +418,16 @@ define(function (require, exports, module) {
                 colorTemplate = "<span class='color-swatch' style='background-color:" + matchValue.toHexString() + ";'></span>";
             }                
             
-            return match[1] + colorTemplate + "<span style='color:#a0a0a0; margin-left: 10px'>" + match[2] + "</span>";
-            
+            result = match[1] + colorTemplate + "<span style='color:#a0a0a0; margin-left: 10px'>" + match[2] + "</span>";
+            if (match.path.length) {
+                //adding path, from which variables value was taken
+                //hardcoded color here. Change on your own likes
+                rezult += '<span style="color:#a0a0a0;"><= ' + match.path.join(' <= ') + '</span>';
+            }
+
+            return result
         });
+
 
     };
 

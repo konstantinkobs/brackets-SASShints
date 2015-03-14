@@ -29,5 +29,6 @@ You can see this as a feature! just type **@** followed by your mixins name, and
 
 ##How to install
 There are two possible ways (since this is a fork):
+
 1. Copy the url of this repository and paste it into ```File -> Extension Manager -> Install from URL```
 2. [Download the code](https://github.com/Systaro/brackets-SASShints/archive/master.zip) and extract it to the Extensions Folder: ```Help -> Show Extension Folder -> user```

@@ -45,13 +45,18 @@ define(function (require, exports, module) {
     function Hint() {
 
         // Some settings
-        this.implicitChar = "$";
-        this.regex = /\$([\w\-]+)\s*:\s*([^\n;]+)/ig;
-        this.chars = /[\$\w\-]/i;
+        this.implicitCharVars = "$"; //defines hintChar $ for variables
+        this.implicitCharMixins = "@"; //defines hintChar @ for mixins
+
+        this.regexVars = /\$([\w\-]+)\s*:\s*([^\n;]+)/ig; //defines regex for variables
+        this.regexMixin = /@mixin(.*)/ig; //defines regex for mixins
+        this.regex = this.regexVars; //the regex variable, which will be overwritten with one of the above depnding on the hint trigger. Defaults to variable regex
+        this.chars = /([\$\w\-]|[\@\w\-])/i;
 
         // Array with hints and the visual list in HTML
         this.hints = [];
         this.hintsHTML = [];
+        this.currentTrigger;
 
         // String which was written since the hinter is active
         this.writtenSinceStart = "";
@@ -70,14 +75,35 @@ define(function (require, exports, module) {
      */
     Hint.prototype.hasHints = function (editor, implicitChar) {
 
-        // The editor instance
-        this.editor = editor;
+        var isValidTrigger = false;
 
-        // Set the start position for calculating the written text later
-        this.startPos = editor.getCursorPos();
+        // Check if the written character is the vars trigger & set regex
+        if (implicitChar === this.implicitCharVars) {
+            isValidTrigger = true;
+            this.regex = this.regexVars;
+        }
 
-        // Check if the written character is the trigger
-        return implicitChar ? implicitChar === this.implicitChar : false;
+        // Check if the written character is the mixins trigger & set regex
+        else if (implicitChar === this.implicitCharMixins) {
+            isValidTrigger = true;
+            this.regex = this.regexMixin;
+        }
+
+
+        if (isValidTrigger) {
+            // The editor instance
+            this.editor = editor;
+
+            // Set the start position for calculating the written text later
+            this.startPos = editor.getCursorPos();
+
+            //sets currentTrigger, so that the extension knows which trigger was used
+            this.currentTrigger = implicitChar;
+
+            return true;
+        }
+
+        return false;
 
     };
 
@@ -101,17 +127,20 @@ define(function (require, exports, module) {
         // so we rename it to that.
         var that = this;
 
-        // Get the text in the file
-        this.getText().done(function (text) {
+        // Get the text in the file. Texts are returned as one array with multiple objects, each containing the files content and the file reference
+        this.getText().done(function (texts) {
+            var allMatches = [];
 
-            // Get all matches for the RegExp set earlier
-            var matches = that.getAll(that.regex, text);
+            //iterate over texts from all files
+            texts.forEach(function (elem) {
+                // Get all matches for the RegExp set earlierf
+                allMatches = allMatches.concat(that.getAll(that.regex, elem.content, elem.file._name));
+            });
 
             // Filter the results by everything the user wrote before
-            matches = that.filterHints(matches);
-
+            allMatches = that.filterHints(allMatches);
             // Prepare the hint arrays
-            that.processHints(matches);
+            that.processHints(allMatches);
 
             // Send hints to caller
             result.resolve({
@@ -217,7 +246,12 @@ define(function (require, exports, module) {
                 DocumentManager.getDocumentText(file)
                     .done(function (content) {
 
-                        texts.push(content);
+
+                        //create object with content and file reference, which is returned by the getText function
+                        texts.push({
+                            content: content,
+                            file: file
+                        });
 
                     }).always(function () {
 
@@ -230,7 +264,7 @@ define(function (require, exports, module) {
                 // Give the contents back to caller
             }).always(function () {
 
-                result.resolve(texts.join("\n\n"));
+                result.resolve(texts /*.join("\n\n")*/ );
 
             });
 
@@ -256,7 +290,7 @@ define(function (require, exports, module) {
      * @param   {String} text  The searchable string
      * @returns {Array}  All matches of the RegExp in the string
      */
-    Hint.prototype.getAll = function (regex, text) {
+    Hint.prototype.getAll = function (regex, text, filename) {
 
         // We start empty
         var matches = [];
@@ -265,8 +299,10 @@ define(function (require, exports, module) {
         var match;
         while ((match = regex.exec(text)) !== null) {
 
+            match.push(filename);
             // Push it to the array
             matches.push(match);
+
 
         }
 
@@ -282,6 +318,7 @@ define(function (require, exports, module) {
      * @returns {Array} the filtered Array
      */
     Hint.prototype.filterHints = function (matches) {
+        var that = this;
 
         // Split it up/convert to array for fuzzy search
         var written = this.writtenSinceStart.toLowerCase().split("");
@@ -318,7 +355,8 @@ define(function (require, exports, module) {
      *
      * @param   {Array}    matches All the matches (already filtered)
      */
-    Hint.prototype.processHints = function (matches) {
+    Hint.prototype.processHints = function (matches, file) {
+        var that = this;
 
         // Sort all filtered matches alphabetically
         matches = matches.sort(function (match1, match2) {
@@ -338,15 +376,35 @@ define(function (require, exports, module) {
 
         // Put every hint for insertion in the hints array
         this.hints = matches.map(function (match) {
-            return match[1];
+
+            //if the results are variables, just the match is needed for insertion into the dom
+            if (that.currentTrigger === that.implicitCharVars) {
+                return match[1];
+            }
+
+            //if the results are mixins, we need to add the keyword "include" before the match, and we need to remove the trailing "{"
+            if (that.currentTrigger === that.implicitCharMixins) {
+                return 'include' + match[1].replace(' {', ';');
+            }
         });
 
         // Create the hintsHTML array which will be shown to the
         // user. It has a preview of what the variable is set to.
         this.hintsHTML = matches.map(function (match) {
-            return match[1] + "<span style='color:#a0a0a0; margin-left: 10px'>" + match[2] + "</span>";
-        });
 
+            //this creates the html markup for the Variable hints. I used a rgb(111, 232, 247) color and a little label to show the user, that these are variables
+            if (that.currentTrigger === that.implicitCharVars) {
+                return "<span style='color: rgb(111, 232, 247); font-weight: bold; font-size: 10px; margin-right: 2px;'>$var</span> " + match[1] + " <span style='color:#a0a0a0; margin-left: 10px'>" + match[2] + "</span>";
+            }
+
+            //this creates the html markup for the Mixin hints. I used a rgb(255, 110, 176) color and a little label to show the user, that these are mixins
+            if (that.currentTrigger === that.implicitCharMixins) {
+                return "<span style='color: rgb(255, 110, 176); font-weight: bold; font-size: 10px; margin-right: 2px;'>include</span> " + match[1].replace(' {', ';') + " <span style='color:#a0a0a0; margin-left: 10px'>" + match[2] + "</span>";
+            }
+
+            return false;
+
+        });
     };
 
     /**

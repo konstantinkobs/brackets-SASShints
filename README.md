@@ -3,6 +3,8 @@
 
 ####!!! This is a fork of the original extension by [konstantinkobs](https://github.com/konstantinkobs/brackets-SASShints/issues/3) to add mixin-hinting functionality
 
+##### This fork and the code changes within it have been created by [DonChillow](https://github.com/DonChillow) and [Systaro](https://github.com/Systaro).
+
 This extension for [Brackets](http://brackets.io) gives you hints for SASS/SCSS variables and mixins and shows what these variables actually are.
 
 ![screenshot](screenshots/screenshot1.png)

@@ -23,7 +23,7 @@ It even has fuzzy search capabilities, so you can for example do this:
 ##Mixins
 Beware, if you start typing **@include**, the hints will be filtered by those letters (ie 'include'), meaning you might not see some of the mixins that you ought to see.
 
-You can see this as a feature! just type **@** followed by your mixins name, and the list will be filtered. For instance, **@vendo** will find the mixin defined as **@mixin vendor-property()**
+You can see this as a feature! just type **@** followed by your mixins name, and the list will be filtered. For instance, **@vendo** will find the mixins that include that substring, such as **@mixin vendor-property()**
 
 ![screenshot](screenshots/screenshot2.png)
 

@@ -27,6 +27,7 @@
 define(function (require, exports, module) {
     "use strict";
 
+    // Brackets modules
     var AppInit = brackets.getModule("utils/AppInit"),
         CodeHintManager = brackets.getModule("editor/CodeHintManager"),
         DocumentManager = brackets.getModule("document/DocumentManager"),
@@ -35,7 +36,9 @@ define(function (require, exports, module) {
         FileUtils = brackets.getModule("file/FileUtils"),
         Async = brackets.getModule("utils/Async");
 
-
+    // Extension's modules
+    var TinyColor = require("thirdparty/tinycolor-min");    
+    
     // All file extensions that are supported
     var fileextensions = ["sass", "scss"];
 
@@ -340,11 +343,22 @@ define(function (require, exports, module) {
         this.hints = matches.map(function (match) {
             return match[1];
         });
-
+      
         // Create the hintsHTML array which will be shown to the
         // user. It has a preview of what the variable is set to.
         this.hintsHTML = matches.map(function (match) {
-            return match[1] + "<span style='color:#a0a0a0; margin-left: 10px'>" + match[2] + "</span>";
+            
+            var matchValue = TinyColor(match[2]);
+            var colorTemplate = '';
+            
+            //Check if value is a valid color
+            //Using Brackets default swatch class for styling
+            if (TinyColor(matchValue).isValid()){
+                colorTemplate = "<span class='color-swatch' style='background-color:" + matchValue.toHexString() + ";'></span>";
+            }                
+            
+            return match[1] + colorTemplate + "<span style='color:#a0a0a0; margin-left: 10px'>" + match[2] + "</span>";
+            
         });
 
     };

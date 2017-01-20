@@ -35,6 +35,8 @@ define(function (require, exports, module) {
         FileUtils = brackets.getModule("file/FileUtils"),
         Async = brackets.getModule("utils/Async");
 
+    var TinyColor = require("thirdparty/tinycolor-min");
+
 
     // All file extensions that are supported
     var fileextensions = ["sass", "scss"];
@@ -247,17 +249,17 @@ define(function (require, exports, module) {
                     .done(function (content) {
 
 
-                        //create object with content and file reference, which is returned by the getText function
-                        texts.push({
-                            content: content,
-                            file: file
-                        });
-
-                    }).always(function () {
-
-                        parallelResult.resolve();
-
+                    //create object with content and file reference, which is returned by the getText function
+                    texts.push({
+                        content: content,
+                        file: file
                     });
+
+                }).always(function () {
+
+                    parallelResult.resolve();
+
+                });
 
                 return parallelResult.promise();
 
@@ -394,7 +396,16 @@ define(function (require, exports, module) {
 
             //this creates the html markup for the Variable hints. I used a rgb(111, 232, 247) color and a little label to show the user, that these are variables
             if (that.currentTrigger === that.implicitCharVars) {
-                return "<span style='color: rgb(111, 232, 247); font-weight: bold; font-size: 10px; margin-right: 2px;'>$var</span> " + match[1] + " <span style='color:#a0a0a0; margin-left: 10px'>" + match[2] + "</span>";
+                var matchValue = TinyColor(match[2]);
+                var colorTemplate = '';
+
+                //Check if value is a valid color
+                //Using Brackets default swatch class for styling
+                if (TinyColor(matchValue).isValid()){
+                    colorTemplate = "<span class='color-swatch' style='float:right; background-color:" + matchValue.toHexString() + ";'></span>";
+                }
+                
+                return "<span style='color: rgb(111, 232, 247); font-weight: bold; font-size: 10px; margin-right: 2px;'>var</span> " + match[1] + colorTemplate + " <span style='color:#a0a0a0; margin-left: 10px'>" + match[2] + "</span>";
             }
 
             //this creates the html markup for the Mixin hints. I used a rgb(255, 110, 176) color and a little label to show the user, that these are mixins

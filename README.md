@@ -1,9 +1,8 @@
 # SASShints (fork by [maximmis](https://github.com/maximmis))
-> Autocompletion for SASS/SCSS variables and mixins in [Brackets](http://brackets.io).
-Now with added support for color previews
+#### Autocompletion for SASS/SCSS variables and mixins in [Brackets](http://brackets.io). Now with added support for color previews
 
-#### This is a fork of the original extension by [konstantinkobs](https://github.com/konstantinkobs/brackets-SASShints/issues/3) to add variable and mixin hinting functionality for SASS/SCSS.
-#### This fork and the code changes within it have been created by [DonChillow](https://github.com/DonChillow), [Systaro](https://github.com/Systaro) and [Dularion](https://github.com/Dularion). Color previews via [TinyColor](https://github.com/bgrins/TinyColor).
+> This is a fork of the original extension by [konstantinkobs](https://github.com/konstantinkobs/brackets-SASShints/issues/3) to add variable and mixin hinting functionality for SASS/SCSS.
+This fork and the code changes within it have been created by [DonChillow](https://github.com/DonChillow), [Systaro](https://github.com/Systaro) and [Dularion](https://github.com/Dularion). Color previews via [TinyColor](https://github.com/bgrins/TinyColor).
 
 ##Variables
 

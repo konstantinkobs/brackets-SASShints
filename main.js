@@ -35,7 +35,8 @@ define(function (require, exports, module) {
         FileUtils = brackets.getModule("file/FileUtils"),
         Async = brackets.getModule("utils/Async");
 
-    var TinyColor = require("thirdparty/tinycolor-min");
+    // Color swatch micro-framework
+    var TinyColor = require("tinycolor-min");
 
 
     // All file extensions that are supported

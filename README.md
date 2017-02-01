@@ -27,8 +27,8 @@ Just type **@** followed by your mixins name, and the list will be filtered. For
 
 ## How to install
 
-I'm working on delivering it straight from Bracktes,
-but for now there are two possible ways:
+Three possible ways:
 
-1. Copy the url of this repository and paste it into ```File -> Extension Manager -> Install from URL```
-2. [Download the code](https://github.com/maximmis/brackets-SASShints/archive/master.zip) and extract it to the Extensions Folder: ```Help -> Show Extension Folder -> user```
+1. Directly from Brackets: ```File -> Extension Manager -> search for SASS/SCSS Hints```
+2. Copy the url of this repository and paste it into ```File -> Extension Manager -> Install from URL```
+3. [Download the code](https://github.com/maximmis/brackets-SASShints/archive/master.zip) and extract it to the Extensions Folder: ```Help -> Show Extension Folder -> user```

@@ -4,7 +4,7 @@
 > This is a fork of the original extension by [konstantinkobs](https://github.com/konstantinkobs/brackets-SASShints/issues/3) to add variable and mixin hinting functionality for SASS/SCSS.
 This fork and the code changes within it have been created by [DonChillow](https://github.com/DonChillow), [Systaro](https://github.com/Systaro) and [Dularion](https://github.com/Dularion). Color previews via [TinyColor](https://github.com/bgrins/TinyColor).
 
-##Variables
+## Variables
 
 ![screenshot](screenshots/vars.gif)
 
